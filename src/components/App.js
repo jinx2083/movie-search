@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Container, Row, Col, Button, Alert } from "react-bootstrap";
+import { Container, Row, Col, Button, Alert, Spinner } from "react-bootstrap";
 import styled from "styled-components";
 
 import SearchBar from "./SearchBar";
@@ -8,31 +8,39 @@ import SearchBar from "./SearchBar";
 const App = () => {
   const [movieResults, setMoviesResults] = useState([]);
   const [nominations, setNominations] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("rambo");
+  const [input, setInput] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [error, setError] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSearchTerm(input);
+    setError(null);
     try {
       setLoading(true);
       const res = await axios.get(
         `https://www.omdbapi.com/?apikey=${[
           process.env.REACT_APP_APIKEY,
-        ]}&s=${searchTerm}&type=movie&page=${currentPage}`
+        ]}&s=${input}&type=movie&page=${currentPage}`
       );
-      setMoviesResults(res.data.Search);
-      setTotalResults(res.data.totalResults);
+      if (res.data.Error) {
+        setError(res.data.Error);
+      } else {
+        setMoviesResults(res.data.Search);
+        setTotalResults(res.data.totalResults);
+      }
     } catch (e) {
-      console.warn("something wrong happened", e);
+      console.warn("Something wrong happened", e);
     } finally {
       setLoading(false);
     }
   };
 
   const handleChange = (e) => {
-    setSearchTerm(e.target.value);
+    setInput(e.target.value);
   };
 
   const handleNomination = (title, year) => {
@@ -51,8 +59,13 @@ const App = () => {
     <div className="App">
       <Container>
         <Row>
-          <h1>The Shoppies</h1>
+          <Col>
+            <Header>The Shoppies </Header>
+          </Col>
         </Row>
+      </Container>
+
+      <MainContainer>
         <Row>
           <SearchBar handleSubmit={handleSubmit} handleChange={handleChange} />
         </Row>
@@ -67,43 +80,49 @@ const App = () => {
         </Row>
         <Row>
           <Col>
-            {`Results for "${searchTerm}"`}
-            <ul>
-              {movieResults.map((movie, index) => {
-                const title = movie.Title;
-                const year = movie.Year;
-                let btnDisabled = nominations.length === 5 ? true : false;
+            <h5>{`Results for "${searchTerm}"`}</h5>
+            {loading ? (
+              <Spinner color="primary" />
+            ) : error ? (
+              <Alert variant="danger">{error}</Alert>
+            ) : (
+              <ul>
+                {movieResults.map((movie, index) => {
+                  const title = movie.Title;
+                  const year = movie.Year;
+                  let btnDisabled = nominations.length === 5 ? true : false;
 
-                if (
-                  nominations.some(
-                    (movie) => movie.Title === title && movie.Year === year
-                  )
-                ) {
-                  btnDisabled = true;
-                }
-                return (
-                  <li key={index}>
-                    {`${title} (${year}) `}
-                    <Button
-                      onClick={() => handleNomination(title, year)}
-                      disabled={btnDisabled}
-                    >
-                      Nominate
-                    </Button>
-                  </li>
-                );
-              })}
-            </ul>
+                  if (
+                    nominations.some(
+                      (movie) => movie.Title === title && movie.Year === year
+                    )
+                  ) {
+                    btnDisabled = true;
+                  }
+                  return (
+                    <Movies key={index}>
+                      {`${title} (${year}) `}
+                      <Button
+                        onClick={() => handleNomination(title, year)}
+                        disabled={btnDisabled}
+                      >
+                        Nominate
+                      </Button>
+                    </Movies>
+                  );
+                })}
+              </ul>
+            )}
           </Col>
 
           <Col>
-            Nominations
+            <h5>Nominations</h5>
             <ul>
               {nominations.map((movie, index) => {
                 const title = movie.Title;
                 const year = movie.Year;
                 return (
-                  <li key={index}>
+                  <Movies key={index}>
                     {`${title} (${year}) `}
                     <Button
                       onClick={() => handleRemoveNomination(title, year)}
@@ -111,13 +130,13 @@ const App = () => {
                     >
                       Remove
                     </Button>
-                  </li>
+                  </Movies>
                 );
               })}
             </ul>
           </Col>
         </Row>
-      </Container>
+      </MainContainer>
     </div>
   );
 };
@@ -126,4 +145,18 @@ export default App;
 
 const Banner = styled(Alert)`
   width: 100%;
+`;
+
+const MainContainer = styled(Container)`
+  background: white;
+  padding: 10px;
+`;
+
+const Header = styled.h2`
+  margin-top: 40px;
+  margin-bottom: 5px;
+`;
+
+const Movies = styled.li`
+  margin-bottom: 10px;
 `;
