@@ -1,5 +1,5 @@
 # OMDb API Movie Search 
-Link to hosted page: https://samiragadri.github.io/
+Link to hosted page: https://omdb-movie-search-09-20.herokuapp.com/
 
 
 ## About 
