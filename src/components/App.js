@@ -18,7 +18,7 @@ const App = () => {
     try {
       setLoading(true);
       const res = await axios.get(
-        `http://www.omdbapi.com/?apikey=${[
+        `https://www.omdbapi.com/?apikey=${[
           process.env.REACT_APP_APIKEY,
         ]}&s=${searchTerm}&type=movie&page=${currentPage}`
       );
