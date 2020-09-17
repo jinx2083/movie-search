@@ -11,10 +11,13 @@ const App = () => {
   const [input, setInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
-  const [totalResults, setTotalResults] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
   const [error, setError] = useState(null);
 
+  // TODO: implement pagination of movie results
+  const [totalResults, setTotalResults] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // fetches results from OMDb for input when user presses enter
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSearchTerm(input);
@@ -39,14 +42,17 @@ const App = () => {
     }
   };
 
+  // saves the input as user is typing
   const handleChange = (e) => {
     setInput(e.target.value);
   };
 
+  // saves given movie to nominations list
   const handleNomination = (title, year) => {
     setNominations([...nominations, { Title: title, Year: year }]);
   };
 
+  // removes given movie from nominations list
   const handleRemoveNomination = (title, year) => {
     setNominations(
       nominations.filter((movie) => {
@@ -64,8 +70,7 @@ const App = () => {
           </Col>
         </Row>
       </Container>
-
-      <MainContainer>
+      <Container>
         <Row>
           <SearchBar handleSubmit={handleSubmit} handleChange={handleChange} />
         </Row>
@@ -78,8 +83,10 @@ const App = () => {
             )}
           </Col>
         </Row>
+
         <Row>
           <Col>
+            {/* Movie search results display */}
             <h5>{`Results for "${searchTerm}"`}</h5>
             {loading ? (
               <Spinner color="primary" />
@@ -115,6 +122,7 @@ const App = () => {
             )}
           </Col>
 
+          {/* Nominations list display */}
           <Col>
             <h5>Nominations</h5>
             <ul>
@@ -136,7 +144,7 @@ const App = () => {
             </ul>
           </Col>
         </Row>
-      </MainContainer>
+      </Container>
     </div>
   );
 };
@@ -147,14 +155,9 @@ const Banner = styled(Alert)`
   width: 100%;
 `;
 
-const MainContainer = styled(Container)`
-  background: white;
-  padding: 10px;
-`;
-
 const Header = styled.h2`
   margin-top: 40px;
-  margin-bottom: 5px;
+  margin-bottom: 15px;
 `;
 
 const Movies = styled.li`
